@@ -1,0 +1,70 @@
+<div>
+    <div class="row">
+        <div class="col-md-8 col-md-offset-2">
+            <h1 translate="register-external.title">Registration</h1>
+
+            <div class="alert alert-success" ng-show="success" translate="register.messages.success">
+                <strong>Registration saved!</strong> Please check your email for confirmation.
+            </div>
+
+            <div class="alert alert-danger" ng-show="error" translate="register.messages.error.fail">
+                <strong>Registration failed!</strong> Please check your input and try again.
+            </div>
+
+            <form ng-show="!success" name="form" role="form" novalidate ng-submit="register()" show-validation>
+                <p>You're about to create a new account on <strong translate="global.title">JHipster</strong> using a login from</p>
+                <div>
+                    <jh-social type='icon' external-account-provider="registerAccount.externalAccountProvider"></jh-social>
+                    <span>{{registerAccount.firstName}} {{registerAccount.lastName}} {{registerAccount.email}}</span>
+                </div>
+                <br/>
+                <p>Please confirm the following</p>
+
+                <div class="form-group">
+                    <label translate="global.form.username">Login</label>
+                    <input type="text" class="form-control" name="login" placeholder="{{'global.form.username.placeholder' | translate}}"
+                           ng-model="registerAccount.login" ng-minlength=1 ng-maxlength=50 required>
+                    <div ng-show="form.login.$dirty && form.login.$invalid">
+                        <p class="help-block"
+                           ng-show="form.login.$error.required" translate="register.messages.validate.login.required">
+                            Your login is required.
+                        </p>
+                        <p class="help-block"
+                           ng-show="form.login.$error.minlength" translate="register.messages.validate.login.minlength">
+                            Your login is required to be at least 1 character
+                        </p>
+                        <p class="help-block"
+                           ng-show="form.login.$error.maxlength" translate="register.messages.validate.login.maxlength">
+                            Your login cannot be longer than 50 characters
+                        </p>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label translate="global.form.email">E-mail</label>
+                    <input type="email" class="form-control" name="email" placeholder="{{'global.form.email.placeholder' | translate}}"
+                           ng-model="registerAccount.email" ng-minlength=5 ng-maxlength=100 required>
+                    <div ng-show="form.email.$dirty && form.email.$invalid">
+                        <p class="help-block"
+                           ng-show="form.email.$error.required" translate="global.messages.validate.email.required">
+                            Your e-mail is required.
+                        </p>
+                        <p class="help-block"
+                           ng-show="form.email.$error.email" translate="global.messages.validate.email.invalid">
+                            Your e-mail is invalid.
+                        </p>
+                        <p class="help-block"
+                           ng-show="form.email.$error.minlength" translate="global.messages.validate.email.minlength">
+                            Your e-mail is required to be at least 5 characters
+                        </p>
+                        <p class="help-block"
+                           ng-show="form.email.$error.maxlength" translate="global.messages.validate.email.maxlength">
+                            Your e-mail cannot be longer than 100 characters
+                        </p>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary" translate="register.form.button">Register</button>
+            </form>
+        </div>
+    </div>
+</div>

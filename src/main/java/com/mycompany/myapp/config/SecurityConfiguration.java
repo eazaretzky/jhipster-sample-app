@@ -1,10 +1,11 @@
 package com.mycompany.myapp.config;
 
 import com.mycompany.myapp.security.*;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
-
+import org.springframework.security.config.annotation.ObjectPostProcessor;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.method.configuration.GlobalMethodSecurityConfiguration;
@@ -14,15 +15,17 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.StandardPasswordEncoder;
 import org.springframework.security.web.authentication.RememberMeServices;
+import org.springframework.social.security.SocialAuthenticationFilter;
+import org.springframework.social.security.SpringSocialConfigurer;
 
 import javax.inject.Inject;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
-    
+
     @Inject
     private Environment env;
 
@@ -45,42 +48,61 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     private RememberMeServices rememberMeServices;
 
     @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
+    public PasswordEncoder  passwordEncoder() {
+        return new StandardPasswordEncoder();
     }
 
     @Inject
     public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
         auth
-            .userDetailsService(userDetailsService)
+                .userDetailsService(userDetailsService)
                 .passwordEncoder(passwordEncoder());
     }
 
     @Override
     public void configure(WebSecurity web) throws Exception {
         web.ignoring()
-            .antMatchers("/bower_components/**")
-            .antMatchers("/fonts/**")
-            .antMatchers("/images/**")
-            .antMatchers("/scripts/**")
-            .antMatchers("/styles/**")
-            .antMatchers("/views/**")
-            .antMatchers("/i18n/**")
-            .antMatchers("/swagger-ui/**")
-            .antMatchers("/console/**");
+                .antMatchers("/bower_components/**")
+                .antMatchers("/fonts/**")
+                .antMatchers("/images/**")
+                .antMatchers("/scripts/**")
+                .antMatchers("/styles/**")
+                .antMatchers("/views/**")
+                .antMatchers("/i18n/**")
+                .antMatchers("/swagger-ui/**")
+                .antMatchers("/console/**");
     }
-    
+
+    protected SpringSocialConfigurer buildSpringSocialConfigurer() {
+        SpringSocialConfigurer configurer = new SpringSocialConfigurer()
+                .postLoginUrl("/")
+                .alwaysUsePostLoginUrl(true);
+
+        configurer.addObjectPostProcessor(
+                new ObjectPostProcessor<SocialAuthenticationFilter>() {
+                    @Override
+                    public <O extends SocialAuthenticationFilter> O postProcess(O object) {
+                        object.setSignupUrl("/#/register-external");
+                        return object;
+                    }
+
+                }
+        );
+
+        return configurer;
+    }
+
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http
-            .exceptionHandling()
+                .exceptionHandling()
                 .authenticationEntryPoint(authenticationEntryPoint)
                 .and()
-            .rememberMe()
+                .rememberMe()
                 .rememberMeServices(rememberMeServices)
                 .key(env.getProperty("jhipster.security.rememberme.key"))
                 .and()
-            .formLogin()
+                .formLogin()
                 .loginProcessingUrl("/app/authentication")
                 .successHandler(ajaxAuthenticationSuccessHandler)
                 .failureHandler(ajaxAuthenticationFailureHandler)
@@ -88,20 +110,23 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .passwordParameter("j_password")
                 .permitAll()
                 .and()
-            .logout()
+                .apply(buildSpringSocialConfigurer()).and()
+                .logout()
                 .logoutUrl("/app/logout")
                 .logoutSuccessHandler(ajaxLogoutSuccessHandler)
                 .deleteCookies("JSESSIONID")
                 .permitAll()
                 .and()
-            .csrf()
+                .csrf()
                 .disable()
-            .headers()
+                .headers()
                 .frameOptions().disable()
-            .authorizeRequests()
+                .authorizeRequests()
                 .antMatchers("/app/rest/register").permitAll()
+                .antMatchers("/app/rest/register_external").permitAll()
                 .antMatchers("/app/rest/activate").permitAll()
                 .antMatchers("/app/rest/authenticate").permitAll()
+                .antMatchers("/auth/**").permitAll()
                 .antMatchers("/app/rest/logs/**").hasAuthority(AuthoritiesConstants.ADMIN)
                 .antMatchers("/app/**").authenticated()
                 .antMatchers("/metrics/**").hasAuthority(AuthoritiesConstants.ADMIN)
@@ -116,11 +141,10 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .antMatchers("/trace/**").hasAuthority(AuthoritiesConstants.ADMIN)
                 .antMatchers("/api-docs/**").hasAuthority(AuthoritiesConstants.ADMIN)
                 .antMatchers("/protected/**").authenticated();
-
     }
-    
-    
-	
+
+
+
     @EnableGlobalMethodSecurity(prePostEnabled = true, jsr250Enabled = true)
     private static class GlobalSecurityConfiguration extends GlobalMethodSecurityConfiguration {
     }

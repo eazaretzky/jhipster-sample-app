@@ -1,6 +1,7 @@
 package com.mycompany.myapp.service;
 
 import com.mycompany.myapp.domain.Authority;
+import com.mycompany.myapp.domain.ExternalAccount;
 import com.mycompany.myapp.domain.PersistentToken;
 import com.mycompany.myapp.domain.User;
 import com.mycompany.myapp.repository.AuthorityRepository;
@@ -8,6 +9,7 @@ import com.mycompany.myapp.repository.PersistentTokenRepository;
 import com.mycompany.myapp.repository.UserRepository;
 import com.mycompany.myapp.security.SecurityUtils;
 import com.mycompany.myapp.service.util.RandomUtil;
+import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 import org.slf4j.Logger;
@@ -57,15 +59,27 @@ public class UserService {
         return user;
     }
 
-    public User createUserInformation(String login, String password, String firstName, String lastName, String email,
-                                      String langKey) {
+    public User createUserInformation(String login, String password, String firstName, String lastName, String email, String langKey, ExternalAccount externalAccount) {
         User newUser = new User();
-        Authority authority = authorityRepository.findOne("ROLE_USER");
-        Set<Authority> authorities = new HashSet<>();
-        String encryptedPassword = passwordEncoder.encode(password);
         newUser.setLogin(login);
-        // new user gets initially a generated password
-        newUser.setPassword(encryptedPassword);
+
+        boolean havePassword = StringUtils.isNotBlank(password);
+        boolean haveExternalAccount = externalAccount != null;
+
+        // either a password or an external account, but not both
+        if (!(havePassword ^ haveExternalAccount))
+            throw new IllegalArgumentException("must specify either a non-blank password or an external account");
+
+        if (havePassword) {
+            // FIXME: server side validation?
+            String encryptedPassword = passwordEncoder.encode(password);
+            newUser.setPassword(encryptedPassword);
+        }
+        else {
+            newUser.getExternalAccounts().add(externalAccount);
+            externalAccount.setUser(newUser);
+        }
+
         newUser.setFirstName(firstName);
         newUser.setLastName(lastName);
         newUser.setEmail(email);
@@ -74,12 +88,18 @@ public class UserService {
         newUser.setActivated(false);
         // new user gets registration key
         newUser.setActivationKey(RandomUtil.generateActivationKey());
+
+        // authorities
+        Authority authority = authorityRepository.findOne("ROLE_USER");
+        Set<Authority> authorities = new HashSet<>();
         authorities.add(authority);
         newUser.setAuthorities(authorities);
-        userRepository.save(newUser);
-        log.debug("Created Information for User: {}", newUser);
-        return newUser;
+
+        User databaseUser = userRepository.save(newUser);
+        log.debug("Created Information for User: {}", databaseUser);
+        return databaseUser;
     }
+
 
     public void updateUserInformation(String firstName, String lastName, String email) {
         User currentUser = userRepository.findOne(SecurityUtils.getCurrentLogin());

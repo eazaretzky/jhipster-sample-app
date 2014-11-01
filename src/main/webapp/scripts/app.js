@@ -15,6 +15,13 @@ jhipsterApp
                         authorizedRoles: [USER_ROLES.all]
                     }
                 })
+                .when('/register-external', {
+                    templateUrl: 'views/register-external.html',
+                    controller: 'RegisterController',
+                    access: {
+                        authorizedRoles: [USER_ROLES.all]
+                    }
+                })
                 .when('/activate', {
                     templateUrl: 'views/activate.html',
                     controller: 'ActivationController',

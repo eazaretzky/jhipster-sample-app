@@ -106,6 +106,9 @@
                 <button type="submit" ng-disabled="form.$invalid" class="btn btn-primary" translate="register.form.button">Register</button>
             </form>
             <p></p>
+            <jh-social type='block'  create-auth-link external-account-provider="'google'">Create an account using Google</jh-social>
+            <jh-social type='block' create-auth-link external-account-provider="'facebook'">Create an account using Facebook</jh-social>
+            <p></p>
             <div class="alert alert-warning" translate="global.messages.info.authenticated">
                 If you want to <a href="#/login">authenticate</a>, you can try the default login="admin" and
                 password="admin".

@@ -30,6 +30,17 @@ spring:
     mail:
         baseUrl: http://localhost:8080
 
+    social:
+        # see https://developers.google.com/+/web/signin/server-side-flow#step_1_create_a_client_id_and_client_secret
+        google:
+            clientId: your_client_id.apps.googleusercontent.com
+            clientSecret: your_client_secret
+
+        # see https://developers.facebook.com/docs/facebook-login/v2.1
+        facebook:
+            clientId: your_client_id
+            clientSecret: your_client_secret
+
     thymeleaf:
         mode: XHTML
         cache: false

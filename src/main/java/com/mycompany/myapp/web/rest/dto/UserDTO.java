@@ -1,6 +1,9 @@
 package com.mycompany.myapp.web.rest.dto;
 
+import com.mycompany.myapp.domain.ExternalAccountProvider;
+
 import java.util.List;
+
 
 public class UserDTO {
 
@@ -18,11 +21,15 @@ public class UserDTO {
 
     private List<String> roles;
 
+    private ExternalAccountProvider externalAccountProvider;
+
+    private String externalId;
+
     public UserDTO() {
     }
 
     public UserDTO(String login, String password, String firstName, String lastName, String email, String langKey,
-                   List<String> roles) {
+                   List<String> roles, ExternalAccountProvider externalAccountProvider, String externalId) {
         this.login = login;
         this.password = password;
         this.firstName = firstName;
@@ -30,6 +37,8 @@ public class UserDTO {
         this.email = email;
         this.langKey = langKey;
         this.roles = roles;
+        this.externalAccountProvider = externalAccountProvider;
+        this.externalId = externalId;
     }
 
     public String getPassword() {
@@ -60,6 +69,19 @@ public class UserDTO {
         return roles;
     }
 
+    public ExternalAccountProvider getExternalAccountProvider() {
+        return externalAccountProvider;
+    }
+
+    public String getExternalId() {
+        return externalId;
+    }
+
+    public void setExternalId(String externalId) {
+        this.externalId = externalId;
+    }
+
+
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder("UserDTO{");
@@ -71,7 +93,8 @@ public class UserDTO {
         sb.append(", lastName='").append(lastName).append('\'');
         sb.append(", email='").append(email).append('\'');
         sb.append(", langKey='").append(langKey).append('\'');
-        sb.append(", roles=").append(roles);
+        sb.append(", roles='").append(roles).append('\'');
+        sb.append(", externalAccountProvider='").append(externalAccountProvider).append('\'');
         sb.append('}');
         return sb.toString();
     }

@@ -2,6 +2,8 @@ package com.mycompany.myapp.web.rest;
 
 import com.codahale.metrics.annotation.Timed;
 import com.mycompany.myapp.domain.Authority;
+import com.mycompany.myapp.domain.ExternalAccount;
+import com.mycompany.myapp.domain.ExternalAccountProvider;
 import com.mycompany.myapp.domain.PersistentToken;
 import com.mycompany.myapp.domain.User;
 import com.mycompany.myapp.repository.PersistentTokenRepository;
@@ -17,6 +19,9 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.social.connect.Connection;
+import org.springframework.social.connect.UserProfile;
+import org.springframework.social.connect.web.ProviderSignInAttempt;
 import org.springframework.web.bind.annotation.*;
 import org.thymeleaf.context.IWebContext;
 import org.thymeleaf.spring4.SpringTemplateEngine;
@@ -26,6 +31,7 @@ import javax.inject.Inject;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.*;
@@ -60,6 +66,44 @@ public class AccountResource {
     @Inject
     private MailService mailService;
 
+    UserDTO providerSignInAttemptAsUserDTO(HttpServletRequest request)
+    {
+        // FIXME: cache this rather than hit the remote service each time
+        HttpSession session = request.getSession(false);
+        if (session != null) {
+            ProviderSignInAttempt attempt = (ProviderSignInAttempt) session.getAttribute(ProviderSignInAttempt.SESSION_ATTRIBUTE);
+
+            if (attempt != null) {
+                // FIXME: test the connection, it could be expired.
+                Connection<?> connection = attempt.getConnection();
+                UserProfile profile = connection.fetchUserProfile();
+
+                String firstName = profile.getFirstName();
+                String lastName = profile.getLastName();
+                String email = profile.getEmail();
+
+                String externalAccountProviderName = connection.getKey().getProviderId();
+                ExternalAccountProvider externalAccountProvider = ExternalAccountProvider.caseInsensitiveValueOf(externalAccountProviderName);
+
+                return new UserDTO(null, null, firstName, lastName, email, "en_US", null, externalAccountProvider, connection.getKey().getProviderUserId());
+            }
+        }
+        return null;
+    }
+
+    @RequestMapping(value = "/rest/register",
+            method = RequestMethod.GET,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    @Timed
+    public ResponseEntity<?> getRegisterAccount(HttpServletRequest request) {
+        UserDTO dto = providerSignInAttemptAsUserDTO(request);
+
+        if (dto != null)
+            return new ResponseEntity<>(dto, HttpStatus.OK);
+        else
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
+
     /**
      * POST  /rest/register -> register the user.
      */
@@ -69,18 +113,51 @@ public class AccountResource {
     @Timed
     public ResponseEntity<?> registerAccount(@RequestBody UserDTO userDTO, HttpServletRequest request,
                                              HttpServletResponse response) {
-        User user = userRepository.findOne(userDTO.getLogin());
+
+        User user = null;
+        if (userDTO.getLogin() != null)
+            user = userRepository.findOne(userDTO.getLogin());
+
         if (user != null) {
             return new ResponseEntity<>(HttpStatus.NOT_MODIFIED);
-        } else {
-            user = userService.createUserInformation(userDTO.getLogin(), userDTO.getPassword(), userDTO.getFirstName(),
-                    userDTO.getLastName(), userDTO.getEmail().toLowerCase(), userDTO.getLangKey());
+        }
+        else {
+
+            String password = null;
+            String email = null;
+            ExternalAccount externalAccount = null;
+            UserDTO externalAttempt = providerSignInAttemptAsUserDTO(request);
+
+            if (externalAttempt == null) {
+                // FIXME: no validation?  it appears that everything is done on the front end
+                password = userDTO.getPassword();
+                email = userDTO.getEmail();
+            }
+            else {
+                log.debug("creating user from previous external authentication");
+
+                if (StringUtils.isNotBlank(userDTO.getPassword()))
+                    return new ResponseEntity<>("cannot specify a password for an account that is linked to an external provider", HttpStatus.BAD_REQUEST);
+
+                externalAccount = new ExternalAccount();
+                externalAccount.setExternalProvider(externalAttempt.getExternalAccountProvider());
+                externalAccount.setExternalId(externalAttempt.getExternalId());
+
+                if (StringUtils.isNotBlank(userDTO.getEmail()))
+                    email = userDTO.getEmail();
+                else
+                    email = externalAttempt.getEmail();
+            }
+            user = userService.createUserInformation(userDTO.getLogin(), password, userDTO.getFirstName(),
+                    userDTO.getLastName(), email.toLowerCase(), userDTO.getLangKey(), externalAccount);
+
             final Locale locale = Locale.forLanguageTag(user.getLangKey());
             String content = createHtmlContentFromTemplate(user, locale, request, response);
             mailService.sendActivationEmail(user.getEmail(), content, locale);
             return new ResponseEntity<>(HttpStatus.CREATED);
         }
     }
+
     /**
      * GET  /rest/activate -> activate the registered user.
      */
@@ -132,7 +209,9 @@ public class AccountResource {
                 user.getLastName(),
                 user.getEmail(),
                 user.getLangKey(),
-                roles),
+                roles,
+                null,
+                null),
             HttpStatus.OK);
     }
 
