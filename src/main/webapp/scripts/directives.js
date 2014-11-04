@@ -129,7 +129,7 @@ angular.module('jhipsterApp')
         // these link to functionality provided by spring-social
         var authLinks = {
             'facebook': '/auth/facebook?scope=public_profile,email',
-            'google-plus': '/auth/google?scope=profile https://www.googleapis.com/auth/plus.profile.emails.read'
+            'google-plus': '/auth/google?scope=https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email'
         };
         return {
             restrict: 'E',
@@ -145,7 +145,7 @@ angular.module('jhipsterApp')
                                 element.addClass('btn-block btn-social');
                             }
                             else if (type === 'icon') {
-                                element.addClass('btn-social-icon');
+                                element.addClass('btn-social-icon btn-sm');
                             }
 
                             // turn the enumerated value into something more javascript/css friendly

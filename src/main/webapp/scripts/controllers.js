@@ -59,36 +59,45 @@ jhipsterApp.controller('SettingsController', function ($scope, Account) {
         };
     });
 
-jhipsterApp.controller('RegisterController', function ($scope, $translate, $location, Register) {
-    $scope.success = null;
+jhipsterApp.controller('RegisterController', function ($scope, $translate, $routeParams, Register) {
+    $scope.status = null;
     $scope.error = null;
-    $scope.doNotMatch = null;
-    $scope.errorUserExists = null;
+    $scope.registerAccount = null;
 
-    $scope.registerAccount = Register.get();
-    $scope.register = function () {
-        if ('externalAccountProvider' in $scope.registerAccount && $scope.registerAccount.password != $scope.confirmPassword) {
-            $scope.doNotMatch = "ERROR";
-        } else {
-            $scope.registerAccount.langKey = $translate.use();
-            $scope.doNotMatch = null;
-            Register.save($scope.registerAccount,
-                function (value, responseHeaders) {
-                    $scope.error = null;
-                    $scope.errorUserExists = null;
-                    $scope.success = 'OK';
-                },
-                function (httpResponse) {
-                    $scope.success = null;
-                    if (httpResponse.status === 304 &&
-                        httpResponse.data.error && httpResponse.data.error === "Not Modified") {
-                        $scope.error = null;
-                        $scope.errorUserExists = "ERROR";
-                    } else {
-                        $scope.error = "ERROR";
-                        $scope.errorUserExists = null;
+    if ('failureType' in $routeParams) {
+        $scope.status = 'failed';
+        $scope.error = $routeParams.failureType;
+    }
+    else {
+        Register.get().$promise.then(
+            function(data) {
+                $scope.registerAccount = data;
+            },
+            function(reason) {
+                $scope.status = 'failed';
+            }
+        );
+        $scope.register = function () {
+            if ('confirmPassword' in $scope && $scope.registerAccount.password != $scope.confirmPassword) {
+                $scope.status = 'error';
+                $scope.error = 'passwordsDoNotMatch';
+            }
+            else {
+                $scope.registerAccount.langKey = $translate.use();
+                Register.save($scope.registerAccount,
+                    function (value, responseHeaders) {
+                        $scope.status = 'success';
+                    },
+                    function (httpResponse) {
+                        $scope.status = "error";
+
+                        if (httpResponse.status === 304 &&
+                            httpResponse.data.error && httpResponse.data.error === "Not Modified") {
+                            $scope.error = "userExists";
+                        }
                     }
-                });
+                );
+            }
         }
     }
 });

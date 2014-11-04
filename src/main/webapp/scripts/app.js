@@ -15,7 +15,7 @@ jhipsterApp
                         authorizedRoles: [USER_ROLES.all]
                     }
                 })
-                .when('/register-external', {
+                .when('/register-external/:failureType?', {
                     templateUrl: 'views/register-external.html',
                     controller: 'RegisterController',
                     access: {
@@ -162,7 +162,7 @@ jhipsterApp
                     Session.invalidate();
                     $rootScope.authenticated = false;
                     if ($location.path() !== "/" && $location.path() !== "" && $location.path() !== "/register" &&
-                            $location.path() !== "/activate" && $location.path() !== "/login") {
+                            $location.path() !== "/activate" && $location.path() !== "/login" && $location.path() !== "/register-external") {
                         var redirect = $location.path();
                         $location.path('/login').search('redirect', redirect).replace();
                     }

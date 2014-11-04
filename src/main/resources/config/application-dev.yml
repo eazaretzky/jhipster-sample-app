@@ -33,13 +33,12 @@ spring:
     social:
         # see https://developers.google.com/+/web/signin/server-side-flow#step_1_create_a_client_id_and_client_secret
         google:
-            clientId: your_client_id.apps.googleusercontent.com
-            clientSecret: your_client_secret
+            clientId: 849281270323-r1iepm02kgbcalq5im9sin0otle4ragl.apps.googleusercontent.com
+            clientSecret: wK_37xy1K8sq30X_YQynSiI-
 
-        # see https://developers.facebook.com/docs/facebook-login/v2.1
         facebook:
-            clientId: your_client_id
-            clientSecret: your_client_secret
+            clientId: 1465127597042928
+            clientSecret: 341d18304d759c8660bbee9d0e7e2f58
 
     thymeleaf:
         mode: XHTML

@@ -86,7 +86,7 @@ public class ExternalAccount implements Serializable {
             return true;
         if (obj == null)
             return false;
-        if (getClass() != obj.getClass())
+        if (!getClass().isAssignableFrom(obj.getClass()))
             return false;
         ExternalAccount other = (ExternalAccount) obj;
         if (externalId == null) {

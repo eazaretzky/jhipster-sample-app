@@ -1,7 +1,6 @@
 package com.mycompany.myapp.config;
 
 import com.mycompany.myapp.security.*;
-
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
@@ -14,9 +13,10 @@ import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.crypto.password.StandardPasswordEncoder;
 import org.springframework.security.web.authentication.RememberMeServices;
+import org.springframework.social.security.SocialAuthenticationException;
 import org.springframework.social.security.SocialAuthenticationFilter;
 import org.springframework.social.security.SpringSocialConfigurer;
 
@@ -49,7 +49,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
     @Bean
     public PasswordEncoder  passwordEncoder() {
-        return new StandardPasswordEncoder();
+        return new BCryptPasswordEncoder();
     }
 
     @Inject
@@ -74,19 +74,24 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     }
 
     protected SpringSocialConfigurer buildSpringSocialConfigurer() {
+        // replace the default exception
+        final SocialLoginExceptionMapper handler = new SocialLoginExceptionMapper("/#/register-external")
+            .add(SocialAuthenticationException.class, "/#/register-external/rejected")
+            .add(UserNotActivatedException.class, "/#/not-activated");
+
         SpringSocialConfigurer configurer = new SpringSocialConfigurer()
                 .postLoginUrl("/")
                 .alwaysUsePostLoginUrl(true);
 
+        // configure options not available using the standard configurer
         configurer.addObjectPostProcessor(
-                new ObjectPostProcessor<SocialAuthenticationFilter>() {
-                    @Override
-                    public <O extends SocialAuthenticationFilter> O postProcess(O object) {
-                        object.setSignupUrl("/#/register-external");
-                        return object;
-                    }
-
+            new ObjectPostProcessor<SocialAuthenticationFilter>() {
+                public SocialAuthenticationFilter postProcess(SocialAuthenticationFilter object) {
+                    object.setAuthenticationFailureHandler(handler);
+                    object.setSignupUrl("/#/register-external");
+                    return object;
                 }
+            }
         );
 
         return configurer;
@@ -124,6 +129,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .authorizeRequests()
                 .antMatchers("/app/rest/register").permitAll()
                 .antMatchers("/app/rest/register_external").permitAll()
+                .antMatchers("/#/register-external/**").permitAll()
                 .antMatchers("/app/rest/activate").permitAll()
                 .antMatchers("/app/rest/authenticate").permitAll()
                 .antMatchers("/auth/**").permitAll()

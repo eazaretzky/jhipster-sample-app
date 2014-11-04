@@ -1,10 +1,8 @@
 package com.mycompany.myapp.security;
 
-import java.util.ArrayList;
-import java.util.Collection;
-
-import javax.inject.Inject;
-
+import com.mycompany.myapp.domain.Authority;
+import com.mycompany.myapp.domain.User;
+import com.mycompany.myapp.repository.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;
@@ -18,12 +16,12 @@ import org.springframework.social.security.SocialUserDetailsService;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.mycompany.myapp.domain.Authority;
-import com.mycompany.myapp.domain.User;
-import com.mycompany.myapp.repository.UserRepository;
+import javax.inject.Inject;
+import java.util.ArrayList;
+import java.util.Collection;
 
 /**
- * Authenticate a user from the database.
+ * Authenticate a user from the database or a social
  */
 @Component("userDetailsService")
 public class UserDetailsService implements org.springframework.security.core.userdetails.UserDetailsService, SocialUserDetailsService {
@@ -43,6 +41,7 @@ public class UserDetailsService implements org.springframework.security.core.use
             throw new UserNotActivatedException("User " + lowercaseLogin + " was not activated");
         }
 
+        log.debug("User {} exists and is activated", userFromDatabase.getLogin());
         return userFromDatabase;
     }
 
@@ -61,17 +60,17 @@ public class UserDetailsService implements org.springframework.security.core.use
         log.debug("Authenticating {}", login);
         User user = getUser(login);
         Collection<GrantedAuthority> grantedAuthorities = getGrantedAuthorities(user);
+        log.debug("Login successful");
         return new org.springframework.security.core.userdetails.User(user.getLogin(), user.getPassword(), grantedAuthorities);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public SocialUserDetails loadUserByUserId(String userId) throws UsernameNotFoundException, DataAccessException {
-        log.debug("Socially authenticating {}", userId);
-        log.debug("attempting to load user '" + userId + "'");
+    public SocialUserDetails loadUserByUserId(final String userId) throws UsernameNotFoundException, DataAccessException {
+        log.debug("Authenticating {} from social login", userId);
         User user = getUser(userId);
         Collection<GrantedAuthority> grantedAuthorities = getGrantedAuthorities(user);
-
+        log.debug("Login successful");
         return new SocialUser(user.getLogin(), "n/a", grantedAuthorities);
     }
 }

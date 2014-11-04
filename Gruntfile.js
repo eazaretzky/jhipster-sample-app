@@ -51,7 +51,35 @@ module.exports = function (grunt) {
         connect: {
             proxies: [
                 {
+                    context: '/api-docs',
+                    host: 'localhost',
+                    port: 8080,
+                    https: false,
+                    changeOrigin: false
+                },
+                {
                     context: '/app',
+                    host: 'localhost',
+                    port: 8080,
+                    https: false,
+                    changeOrigin: false
+                },
+                {
+                    context: '/auth',
+                    host: 'localhost',
+                    port: 8080,
+                    https: false,
+                    changeOrigin: false
+                },
+                {
+                    context: '/console',
+                    host: 'localhost',
+                    port: 8080,
+                    https: false,
+                    changeOrigin: false
+                },
+                {
+                    context: '/dump',
                     host: 'localhost',
                     port: 8080,
                     https: false,
@@ -63,28 +91,7 @@ module.exports = function (grunt) {
                     port: 8080,
                     https: false,
                     changeOrigin: false
-                },
-                {
-                context: '/dump',
-                host: 'localhost',
-                port: 8080,
-                https: false,
-                changeOrigin: false
-                },
-                {
-                context: '/api-docs',
-                host: 'localhost',
-                port: 8080,
-                https: false,
-                changeOrigin: false
-                },
-                {
-                    context: '/console',
-                    host: 'localhost',
-                    port: 8080,
-                    https: false,
-                    changeOrigin: false
-                 }
+                }
             ],
             options: {
                 port: 9000,
