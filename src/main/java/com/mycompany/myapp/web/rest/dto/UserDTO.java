@@ -1,9 +1,11 @@
 package com.mycompany.myapp.web.rest.dto;
 
-import com.mycompany.myapp.domain.ExternalAccountProvider;
+import com.mycompany.myapp.domain.ExternalAccount;
 
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
-
+import java.util.Set;
 
 public class UserDTO {
 
@@ -21,15 +23,13 @@ public class UserDTO {
 
     private List<String> roles;
 
-    private ExternalAccountProvider externalAccountProvider;
-
-    private String externalId;
+    private Set<ExternalAccount> externalAccounts = new HashSet<>();
 
     public UserDTO() {
     }
 
-    public UserDTO(String login, String password, String firstName, String lastName, String email, String langKey,
-                   List<String> roles, ExternalAccountProvider externalAccountProvider, String externalId) {
+    public UserDTO(String login, String firstName, String lastName, String email, String langKey,
+                   List<String> roles, Set<ExternalAccount> externalAccounts) {
         this.login = login;
         this.password = password;
         this.firstName = firstName;
@@ -37,8 +37,14 @@ public class UserDTO {
         this.email = email;
         this.langKey = langKey;
         this.roles = roles;
-        this.externalAccountProvider = externalAccountProvider;
-        this.externalId = externalId;
+        this.externalAccounts.addAll(externalAccounts);
+    }
+
+    public UserDTO(String firstName, String lastName, String email, ExternalAccount externalAccount) {
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.email = email;
+        this.externalAccounts.add(externalAccount);
     }
 
     public String getPassword() {
@@ -69,18 +75,9 @@ public class UserDTO {
         return roles;
     }
 
-    public ExternalAccountProvider getExternalAccountProvider() {
-        return externalAccountProvider;
+    public Set<ExternalAccount> getExternalAccounts() {
+        return Collections.unmodifiableSet(externalAccounts);
     }
-
-    public String getExternalId() {
-        return externalId;
-    }
-
-    public void setExternalId(String externalId) {
-        this.externalId = externalId;
-    }
-
 
     @Override
     public String toString() {
@@ -93,8 +90,8 @@ public class UserDTO {
         sb.append(", lastName='").append(lastName).append('\'');
         sb.append(", email='").append(email).append('\'');
         sb.append(", langKey='").append(langKey).append('\'');
-        sb.append(", roles='").append(roles).append('\'');
-        sb.append(", externalAccountProvider='").append(externalAccountProvider).append('\'');
+        sb.append(", roles=").append(roles);
+        sb.append(", externalAccounts=" + externalAccounts);
         sb.append('}');
         return sb.toString();
     }

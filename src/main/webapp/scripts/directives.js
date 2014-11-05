@@ -138,7 +138,7 @@ angular.module('jhipsterApp')
             link: function(scope, element, attrs, ctrl, transclude) {
                 scope.$watch(attrs['externalAccountProvider'],
                     function(externalAccountProvider) {
-                        if (name !== undefined) {
+                        if (externalAccountProvider !== undefined) {
                             // build either a block style or icon style button
                             var type = attrs['type'];
                             if (type === 'block') {

@@ -1,7 +1,8 @@
 package com.mycompany.myapp.security.social;
 
-import javax.inject.Inject;
-
+import com.mycompany.myapp.domain.ExternalAccountProvider;
+import com.mycompany.myapp.domain.User;
+import com.mycompany.myapp.repository.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.social.connect.Connection;
@@ -10,9 +11,7 @@ import org.springframework.social.connect.ConnectionSignUp;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.mycompany.myapp.domain.User;
-import com.mycompany.myapp.domain.ExternalAccountProvider;
-import com.mycompany.myapp.repository.UserRepository;
+import javax.inject.Inject;
 
 /**
  * An implementation of ConnectionSignUp that resolves the User login for a social
@@ -29,7 +28,7 @@ public class SocialConnectionSignUp implements ConnectionSignUp {
 
     /**
      * Map a Connection to an existing User by searching for an ExternalAccount that matches
-     * the Connection's {@link org.springframework.social.connect.ConnectionKey}.  For example,
+     * the Connection's {@link org.springframework.social.connect.ConnectionKey ConnectionKey}.  For example,
      * given a ConnectionKey with a providerId of "google" and a providerUserId of "12345691011",
      * search for an ExternalAccount that matches and return the {@link com.mycompany.myapp.domain.User#getLogin() login}
      * associated with the account.

@@ -1,23 +1,11 @@
 package com.mycompany.myapp.domain;
 
-import java.io.Serializable;
-
-import javax.persistence.Column;
-import javax.persistence.Embeddable;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-import javax.validation.constraints.NotNull;
-
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import javax.persistence.*;
+import java.io.Serializable;
 
 /**
  * An externally managed account that is associated with an internal user.  For example, an
@@ -43,6 +31,14 @@ public class ExternalAccount implements Serializable {
     @JsonIgnore
     @ManyToOne(optional = false)
     private User user;
+
+    public ExternalAccount() {
+    }
+
+    public ExternalAccount(ExternalAccountProvider externalProvider, String externalId) {
+        this.externalProvider = externalProvider;
+        this.externalId = externalId;
+    }
 
     public ExternalAccountProvider getExternalProvider() {
         return externalProvider;

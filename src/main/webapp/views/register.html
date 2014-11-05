@@ -4,7 +4,7 @@
             <!-- header and validation messages -->
             <ng-include src="'views/register-common-messages.html'"></ng-include>
 
-            <form ng-show="!success" name="form" role="form" novalidate ng-submit="register()" show-validation>
+            <form ng-show="status != 'failed' && status != 'success'" name="form" role="form" novalidate ng-submit="register()" show-validation>
 
                 <!-- login -->
                 <ng-include src="'views/register-common-input.html'"></ng-include>

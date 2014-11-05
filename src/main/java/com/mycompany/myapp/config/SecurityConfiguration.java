@@ -1,6 +1,7 @@
 package com.mycompany.myapp.config;
 
 import com.mycompany.myapp.security.*;
+import com.mycompany.myapp.security.social.SocialLoginExceptionMapper;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
@@ -73,11 +74,17 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .antMatchers("/console/**");
     }
 
+    /**
+     * Build a configurer that can be applied to an HttpSecurity instance.  When the configurer is applied,
+     * Spring Social Security's {@link org.springframework.social.security.SocialAuthenticationFilter}
+     * will be added to the HttpSecurity's SecurityFilterChain.
+     * @return
+     */
     protected SpringSocialConfigurer buildSpringSocialConfigurer() {
-        // replace the default exception
+        // build an AuthenticationFailureHandler that is aware of our own exception types
         final SocialLoginExceptionMapper handler = new SocialLoginExceptionMapper("/#/register-external")
             .add(SocialAuthenticationException.class, "/#/register-external/rejected")
-            .add(UserNotActivatedException.class, "/#/not-activated");
+            .add(UserNotActivatedException.class, "/#/activate");
 
         SpringSocialConfigurer configurer = new SpringSocialConfigurer()
                 .postLoginUrl("/")
@@ -87,7 +94,9 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
         configurer.addObjectPostProcessor(
             new ObjectPostProcessor<SocialAuthenticationFilter>() {
                 public SocialAuthenticationFilter postProcess(SocialAuthenticationFilter object) {
+                    // replace the default exception
                     object.setAuthenticationFailureHandler(handler);
+
                     object.setSignupUrl("/#/register-external");
                     return object;
                 }
@@ -129,7 +138,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .authorizeRequests()
                 .antMatchers("/app/rest/register").permitAll()
                 .antMatchers("/app/rest/register_external").permitAll()
-                .antMatchers("/#/register-external/**").permitAll()
+                //.antMatchers("/#/register-external/**").permitAll()
                 .antMatchers("/app/rest/activate").permitAll()
                 .antMatchers("/app/rest/authenticate").permitAll()
                 .antMatchers("/auth/**").permitAll()

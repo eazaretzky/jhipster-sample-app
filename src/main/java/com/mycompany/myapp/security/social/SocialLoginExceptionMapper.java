@@ -1,4 +1,4 @@
-package com.mycompany.myapp.security;
+package com.mycompany.myapp.security.social;
 
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler;
@@ -11,6 +11,9 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * An AuthenticationFailureHandler that replaces Spring's
+ */
 public class SocialLoginExceptionMapper extends SimpleUrlAuthenticationFailureHandler {
 
     private final static String DELEGATED = "SocialLoginRejectedFailureHandler.delegated";

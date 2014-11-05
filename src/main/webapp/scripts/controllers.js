@@ -72,9 +72,15 @@ jhipsterApp.controller('RegisterController', function ($scope, $translate, $rout
         Register.get().$promise.then(
             function(data) {
                 $scope.registerAccount = data;
+
+                // for registration, we're only ever linked to a single provider
+                $scope.externalAccountProvider = data.externalAccounts[0].externalProvider;
             },
-            function(reason) {
-                $scope.status = 'failed';
+            function(httpResponse) {
+                // a 404 means that there isn't an ongoing social registration.  this isn't really an error
+                if (httpResponse.status != 404) {
+                    $scope.status = 'failed';
+                }
             }
         );
         $scope.register = function () {
@@ -103,15 +109,20 @@ jhipsterApp.controller('RegisterController', function ($scope, $translate, $rout
 });
 
 jhipsterApp.controller('ActivationController', function ($scope, $routeParams, Activate) {
-        Activate.get({key: $routeParams.key},
-            function (value, responseHeaders) {
-                $scope.error = null;
-                $scope.success = 'OK';
-            },
-            function (httpResponse) {
-                $scope.success = null;
-                $scope.error = "ERROR";
-            });
+        if ('key' in $routeParams) {
+            Activate.get({key: $routeParams.key},
+                function (value, responseHeaders) {
+                    $scope.error = null;
+                    $scope.success = 'OK';
+                },
+                function (httpResponse) {
+                    $scope.success = null;
+                    $scope.error = "ERROR";
+                });
+        }
+        else {
+            $scope.activationRequired = "ACTIVATE";
+        }
     });
 
 jhipsterApp.controller('PasswordController', function ($scope, Password) {

@@ -7,6 +7,14 @@
                 <strong>Your username has been validated.</strong> Please authenticate.
             </div>
 
+            <div class="alert alert-info" ng-show="activationRequired" translate="activate.messages.activationRequired">
+                <strong>Activation Required.</strong> Your account has been created but you need to verify your email.
+            </div>
+
+            <div class="alert alert-danger" ng-show="error" translate="activate.messages.error">
+                <strong>Your username could not be validated.</strong> Please use the registration form to register your username.
+            </div>
+
             <div class="alert alert-danger" ng-show="error" translate="activate.messages.error">
                 <strong>Your username could not be validated.</strong> Please use the registration form to register your username.
             </div>
