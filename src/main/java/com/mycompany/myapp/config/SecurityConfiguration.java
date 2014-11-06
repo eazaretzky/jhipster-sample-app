@@ -137,8 +137,6 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .frameOptions().disable()
                 .authorizeRequests()
                 .antMatchers("/app/rest/register").permitAll()
-                .antMatchers("/app/rest/register_external").permitAll()
-                //.antMatchers("/#/register-external/**").permitAll()
                 .antMatchers("/app/rest/activate").permitAll()
                 .antMatchers("/app/rest/authenticate").permitAll()
                 .antMatchers("/auth/**").permitAll()
