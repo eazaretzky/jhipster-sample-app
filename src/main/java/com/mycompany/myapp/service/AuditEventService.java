@@ -6,7 +6,6 @@ import com.mycompany.myapp.repository.PersistenceAuditEventRepository;
 import org.joda.time.LocalDateTime;
 import org.springframework.boot.actuate.audit.AuditEvent;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import javax.inject.Inject;
 import java.util.List;
@@ -19,7 +18,6 @@ import java.util.List;
  * </p>
  */
 @Service
-@Transactional
 public class AuditEventService {
 
     @Inject

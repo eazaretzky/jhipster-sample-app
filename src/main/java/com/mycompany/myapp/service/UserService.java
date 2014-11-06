@@ -28,7 +28,6 @@ import java.util.Set;
  * Service class for managing users.
  */
 @Service
-@Transactional
 public class UserService {
 
     private final Logger log = LoggerFactory.getLogger(UserService.class);
@@ -73,7 +72,6 @@ public class UserService {
         }
         else {
             newUser.getExternalAccounts().add(externalAccount);
-            externalAccount.setUser(newUser);
         }
 
         newUser.setLogin(login);
@@ -141,8 +139,6 @@ public class UserService {
         List<PersistentToken> tokens = persistentTokenRepository.findByTokenDateBefore(now.minusMonths(1));
         for (PersistentToken token : tokens) {
             log.debug("Deleting token {}", token.getSeries());
-            User user = token.getUser();
-            user.getPersistentTokens().remove(token);
             persistentTokenRepository.delete(token);
         }
     }

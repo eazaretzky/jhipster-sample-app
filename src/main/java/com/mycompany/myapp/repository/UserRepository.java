@@ -3,22 +3,22 @@ package com.mycompany.myapp.repository;
 import com.mycompany.myapp.domain.ExternalAccountProvider;
 import com.mycompany.myapp.domain.User;
 import org.joda.time.DateTime;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.mongodb.repository.MongoRepository;
+import org.springframework.data.mongodb.repository.Query;
 
 import java.util.List;
 
 /**
- * Spring Data JPA repository for the User entity.
+ * Spring Data MongoDB repository for the User entity.
  */
-public interface UserRepository extends JpaRepository<User, String> {
+public interface UserRepository extends MongoRepository<User, String> {
     
-    @Query("select u from User u where u.activationKey = ?1")
+    @Query("{activationKey: ?0}")
     User getUserByActivationKey(String activationKey);
     
-    @Query("select u from User u where u.activated = false and u.createdDate > ?1")
+    @Query("{activation_key: 'false', createdDate: {$gt: ?0}}")
     List<User> findNotActivatedUsersByCreationDateBefore(DateTime dateTime);
 
-    @Query("select u from User u inner join u.externalAccounts ea where ea.externalProvider = ?1 and ea.externalId = ?2")
+    @Query("{externalAccounts: { $in: [ {externalProvider: ?0, externalId: ?1} ]}}")
     User getUserByExternalAccount(ExternalAccountProvider provider, String externalAccountId);
 }

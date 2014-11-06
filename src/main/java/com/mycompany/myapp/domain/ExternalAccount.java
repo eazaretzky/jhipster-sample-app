@@ -1,36 +1,17 @@
 package com.mycompany.myapp.domain;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import org.hibernate.annotations.Cache;
-import org.hibernate.annotations.CacheConcurrencyStrategy;
-
-import javax.persistence.*;
 import java.io.Serializable;
 
 /**
  * An externally managed account that is associated with an internal user.  For example, an
  * account with Google or Facebook.
  */
-@Entity
-@Table(name = "T_EXTERNAL_ACCOUNT")
-@Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
+//@Document(collection = "T_EXTERNAL_ACCOUNT")
 public class ExternalAccount implements Serializable {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.TABLE)
-    @Column(name = "external_account_id")
-    private Long id;
-
-    @Enumerated(EnumType.STRING)
-    @Column(name = "external_provider", length = 20, nullable = false)
     private ExternalAccountProvider externalProvider;
 
-    @Column(name = "external_id", length = 50, nullable = false)
     private String externalId;
-
-    @JsonIgnore
-    @ManyToOne(optional = false)
-    private User user;
 
     public ExternalAccount() {
     }
@@ -54,14 +35,6 @@ public class ExternalAccount implements Serializable {
 
     public void setExternalId(String externalId) {
         this.externalId = externalId;
-    }
-
-    public User getUser() {
-        return user;
-    }
-
-    public void setUser(User user) {
-        this.user = user;
     }
 
     @Override

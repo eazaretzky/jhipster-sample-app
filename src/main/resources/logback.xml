@@ -33,7 +33,6 @@
     <logger name="com.codahale.metrics" level="WARN"/>
     <logger name="com.ryantenney" level="WARN"/>
     <logger name="com.zaxxer" level="WARN"/>
-    <logger name="net.sf.ehcache" level="WARN"/>
     <logger name="org.apache" level="WARN"/>
     <logger name="org.apache.catalina.startup.DigesterFactory" level="OFF"/>
     <logger name="org.hibernate.validator" level="WARN"/>
@@ -42,11 +41,11 @@
     <logger name="org.atmosphere" level="WARN"/>
     <logger name="org.springframework" level="WARN"/>
     <logger name="org.springframework.web" level="WARN"/>
+    <logger name="org.springframework.security" level="WARN"/>
     <logger name="org.springframework.cache" level="WARN"/>
     <logger name="org.thymeleaf" level="WARN"/>
     <logger name="com.mangofactory.swagger" level="warn"/>
     <logger name="com.wordnik.swagger" level="warn"/>
-    <logger name="liquibase" level="warn"/>
 
     <contextListener class="ch.qos.logback.classic.jul.LevelChangePropagator">
         <resetJUL>true</resetJUL>

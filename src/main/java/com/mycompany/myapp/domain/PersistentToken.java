@@ -2,14 +2,14 @@ package com.mycompany.myapp.domain;
 
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import org.hibernate.annotations.Cache;
-import org.hibernate.annotations.CacheConcurrencyStrategy;
-import org.hibernate.annotations.Type;
 import org.joda.time.LocalDate;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.DBRef;
+import org.springframework.data.mongodb.core.mapping.Document;
 
-import javax.persistence.*;
+
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.io.Serializable;
@@ -20,9 +20,8 @@ import java.io.Serializable;
  *
  * @see com.mycompany.myapp.security.CustomPersistentRememberMeServices
  */
-@Entity
-@Table(name = "T_PERSISTENT_TOKEN")
-@Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
+
+@Document(collection = "T_PERSISTENT_TOKEN")
 public class PersistentToken implements Serializable {
 
     private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormat.forPattern("d MMMM yyyy");
@@ -34,24 +33,21 @@ public class PersistentToken implements Serializable {
 
     @JsonIgnore
     @NotNull
-    @Column(name = "token_value", nullable = false)
     private String tokenValue;
 
     @JsonIgnore
-    @Column(name = "token_date")
-    @Type(type = "org.jadira.usertype.dateandtime.joda.PersistentLocalDate")
     private LocalDate tokenDate;
 
     //an IPV6 address max length is 39 characters
     @Size(min = 0, max = 39)
-    @Column(name = "ip_address", length = 39)
     private String ipAddress;
 
-    @Column(name = "user_agent")
+    
     private String userAgent;
 
     @JsonIgnore
-    @ManyToOne
+    
+    @DBRef
     private User user;
 
     public String getSeries() {
